@@ -1,12 +1,11 @@
-import cheerio from 'cheerio'
+import { load } from 'cheerio'
 
 export function extractMainContent(html: string): string {
-  const $ = cheerio.load(html)
+  const $ = load(html)
   $('script, style, nav, footer, header, aside, noscript').remove()
-  const text = $('body')
+  return $('body')
     .text()
     .replace(/\s+\n/g, '\n')
     .replace(/\n{3,}/g, '\n\n')
     .trim()
-  return text
 }
