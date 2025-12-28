@@ -1,18 +1,12 @@
-import { JSDOM } from 'jsdom'
-import { Readability } from '@mozilla/readability'
+import cheerio from 'cheerio'
 
 export function extractMainContent(html: string): string {
-  try {
-    const dom = new JSDOM(html)
-    const reader = new Readability(dom.window.document)
-    const article = reader.parse()
-    return (
-      article?.textContent
-        ?.replace(/\s+\n/g, '\n')
-        ?.replace(/\n{3,}/g, '\n\n')
-        ?.trim() || ''
-    )
-  } catch (e) {
-    return ''
-  }
+  const $ = cheerio.load(html)
+  $('script, style, nav, footer, header, aside, noscript').remove()
+  const text = $('body')
+    .text()
+    .replace(/\s+\n/g, '\n')
+    .replace(/\n{3,}/g, '\n\n')
+    .trim()
+  return text
 }
