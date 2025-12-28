@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { extractMainContent } from '@/lib/extractContent'
+import { extractMainContent, normalizeText } from '@/lib/extractContent'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
@@ -17,7 +17,7 @@ export async function GET(req: Request) {
   }
 
   const results = await Promise.all(
-    searchData.items.slice(0, 3).map(async (item: any) => {
+    searchData.items.slice(0, 10).map(async (item: any) => {
       try {
         const html = await fetch(item.link, {
           headers: {
@@ -26,7 +26,7 @@ export async function GET(req: Request) {
           },
         }).then(res => res.text())
 
-        const content = extractMainContent(html)
+        const content = normalizeText(extractMainContent(html))
         return {
           title: item.title,
           link: item.link,
