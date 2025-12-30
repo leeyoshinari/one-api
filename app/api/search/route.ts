@@ -4,12 +4,26 @@ import { extractMainContent, normalizeText } from '@/lib/extractContent'
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const q = searchParams.get('q')
+  const lang = searchParams.get('lang')
+  const dateRestrict = searchParams.get('dateRestrict')
+  const num = searchParams.get('num')
 
   if (!q) {
     return NextResponse.json({ error: 'Missing query' }, { status: 400 })
   }
 
-  const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CSE_ID}&q=${encodeURIComponent(q)}&lr=lang_zh&dateRestrict=d2&num=10`
+  let searchUrl = `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CSE_ID}&q=${encodeURIComponent(q)}`
+  if (lang) {
+    searchUrl = searchUrl + '&lr=' + lang    // lang_zh
+  }
+  if (dateRestrict) {
+    searchUrl = searchUrl + '&dateRestrict=' + dateRestrict
+  }
+  if (num) {
+    searchUrl = searchUrl + '&num=' + num
+  } else {
+    searchUrl = searchUrl + '&num=10'
+  }
   const searchRes = await fetch(searchUrl)
   const searchData = await searchRes.json()
   if (!searchData.items) {
