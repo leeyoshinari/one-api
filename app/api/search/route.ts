@@ -9,7 +9,7 @@ export async function GET(req: Request) {
     return NextResponse.json({ error: 'Missing query' }, { status: 400 })
   }
 
-  const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CSE_ID}&q=${encodeURIComponent(q)}`
+  const searchUrl = `https://www.googleapis.com/customsearch/v1?key=${process.env.GOOGLE_API_KEY}&cx=${process.env.GOOGLE_CSE_ID}&q=${encodeURIComponent(q)}&lr=lang_zh&dateRestrict=d2&num=10`
   const searchRes = await fetch(searchUrl)
   const searchData = await searchRes.json()
   if (!searchData.items) {
