@@ -1,12 +1,12 @@
 import { NextResponse } from 'next/server'
-import { extractMainContent, normalizeText } from '@/lib/extractContent'
+import { extractArticle } from '@/lib/extractContent'
 
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url)
   const q = searchParams.get('q')
   const lang = searchParams.get('lang')
   const dateRestrict = searchParams.get('dateRestrict')
-  const num = searchParams.get('num')
+  const num = Number(searchParams.get('num') || 10)
 
   if (!q) {
     return NextResponse.json({ error: 'Missing query' }, { status: 400 })
@@ -21,8 +21,6 @@ export async function GET(req: Request) {
   }
   if (num) {
     searchUrl = searchUrl + '&num=' + num
-  } else {
-    searchUrl = searchUrl + '&num=10'
   }
   const searchRes = await fetch(searchUrl)
   const searchData = await searchRes.json()
@@ -31,27 +29,18 @@ export async function GET(req: Request) {
   }
 
   const results = await Promise.all(
-    searchData.items.slice(0, 10).map(async (item: any) => {
+    searchData.items.slice(0, num).map(async (item: any) => {
       try {
         const html = await fetch(item.link, {
-          headers: {
-            'User-Agent':
-              'Mozilla/5.0 (compatible; Googlebot/2.1; +http://www.google.com/bot.html)',
-          },
+          headers: {'User-Agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36'},
         }).then(res => res.text())
 
-        const content = normalizeText(extractMainContent(html))
-        return {
-          title: item.title,
-          link: item.link,
-          snippet: item.snippet,
-          content,
-        }
+        return extractArticle(html, item.link)
       } catch (e) {
         return {
           title: item.title,
           link: item.link,
-          snippet: item.snippet,
+          length: 0,
           content: '',
         }
       }

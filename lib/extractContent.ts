@@ -1,22 +1,48 @@
-import { load } from 'cheerio'
+import { JSDOM } from "jsdom"
+import { Readability } from "@mozilla/readability"
+import { smartTruncate } from "./smartTruncate"
 
-export function extractMainContent(html: string): string {
-  const $ = load(html)
-  $('script, style, nav, footer, header, aside, noscript').remove()
-  return $('body')
-    .text()
-    .replace(/\s+\n/g, '\n')
-    .replace(/\n{3,}/g, '\n\n')
-    .trim()
+export interface ArticleResult {
+  title: string
+  link: string
+  content: string
+  length: number
 }
 
-export function normalizeText(text: string): string {
-  return text
-    .replace(/\t+/g, ' ')
-    .split('\n')
+export function extractArticle(html: string, url: string): ArticleResult | null {
+  const dom = new JSDOM(html, {
+    url,
+    contentType: "text/html",
+    pretendToBeVisual: true
+  })
+
+  const reader = new Readability(dom.window.document, {
+    debug: false,
+    charThreshold: 100
+  })
+
+  const article = reader.parse()
+
+  if (!article || !article.textContent) {
+    return null
+  }
+
+  const text = article.textContent
+    .replace(/\r/g, "")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .replace(/\r\n?/g, "\n")
+    .replace(/\n\s*\n+/g, "\n\n")
+    .split("\n")
     .map(l => l.trim())
-    .join('\n')
-    .replace(/ {2,}/g, ' ')
-    .replace(/\n{3,}/g, '\n\n')
+    .join("\n")
+    .replace(/[ \t]{2,}/g, " ")
     .trim()
+
+  return {
+    title: article.title?.trim() || "",
+    link: url,
+    content: smartTruncate(text, 3000),
+    length: text.length
+  }
 }
