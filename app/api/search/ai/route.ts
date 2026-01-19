@@ -126,11 +126,16 @@ ${prompts}
             : `${base}/${geminiModel}:generateContent?key=${apiKey}`;
         headers = { "Content-Type": "application/json" };
         body = { contents: [{role: "user", parts: [{ text: finalPrompt }]}] };
-        const response = await fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(body) });
+        let response = await fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(body) });
         if (stream && response.body) {
             return new Response(response.body, { headers: { "Content-Type": "text/event-stream" } });
         }
-        const data = await response.json();
+        let data = await response.json();
+        if ("error" in data && "code" in data.error) {
+            apiUrl = `${base}/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            response = await fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(body) });
+            data = await response.json();
+        }
         return NextResponse.json(data);
     } catch (err: any) {
         console.error("Proxy error:", err);
