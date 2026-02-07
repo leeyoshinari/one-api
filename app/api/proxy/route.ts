@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
 
     // 复制并过滤 headers
     const forwardHeaders: Record<string, string> = {}
+    forwardHeaders['User-Agent'] = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/139.0.0.0 Safari/537.36'
     Object.entries(headers).forEach(([key, value]) => {
       if (
         value &&
@@ -60,7 +61,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 发起转发请求
-    console.log(url);
+    // console.log(url);
     const response = await fetch(url, {
       method,
       headers: forwardHeaders,
