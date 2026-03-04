@@ -132,7 +132,7 @@ ${prompts}
         }
         let data = await response.json();
         if ("error" in data && "code" in data.error) {
-            apiUrl = `${base}/models/gemini-2.5-flash:generateContent?key=${apiKey}`;
+            apiUrl = `${base}/models/gemini-3.1-flash-lite-preview:generateContent?key=${apiKey}`;
             response = await fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(body) });
             data = await response.json();
         }
