@@ -120,7 +120,7 @@ ${prompts}
         let body: any = {};
         const apiKey = getNextKey("GEMINI_API_KEYS") || process.env.GEMINI_API_KEY!;
         const geminiModel = "models/gemini-3-flash-preview";
-        const base = process.env.GEMONI_PROXY_URL || "https://generativelanguage.googleapis.com/v1beta";
+        const base = process.env.GEMINI_PROXY_URL || "https://generativelanguage.googleapis.com/v1beta";
         apiUrl = stream
             ? `${base}/${geminiModel}:streamGenerateContent?alt=sse&key=${apiKey}`
             : `${base}/${geminiModel}:generateContent?key=${apiKey}`;
