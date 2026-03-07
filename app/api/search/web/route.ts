@@ -42,14 +42,14 @@ export async function POST(req: NextRequest) {
 
     try {
         const apiKey = getNextKey("GEMINI_API_KEYS") || process.env.GEMINI_API_KEY!;
-        const geminiModel = "models/gemini-3-flash-preview";
+        const geminiModel = "models/" + process.env.SEARCH_GEMINI_MODEL;
         const base = process.env.GEMINI_PROXY_URL || "https://generativelanguage.googleapis.com/v1beta";
         const apiUrl = stream
             ? `${base}/${geminiModel}:streamGenerateContent?alt=sse&key=${apiKey}`
             : `${base}/${geminiModel}:generateContent?key=${apiKey}`;
         const headers = { "Content-Type": "application/json" };
         const body = { contents: [{role: "user", parts: [{ text: prompts }]}], tools: [{ google_search: {} }], tool_config: {
-                     google_search_retrieval: { dynamic_retrieval_config: { mode: "MODE_DYNAMIC", dynamic_threshold: 0 }}} };
+                     google_search: { dynamic_retrieval_config: { mode: "MODE_DYNAMIC", dynamic_threshold: 0.1 }}} };
         let response = await fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(body) });
         if (!response.ok) {
             const errorData = await response.json();
