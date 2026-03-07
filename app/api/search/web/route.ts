@@ -48,8 +48,7 @@ export async function POST(req: NextRequest) {
             ? `${base}/${geminiModel}:streamGenerateContent?alt=sse&key=${apiKey}`
             : `${base}/${geminiModel}:generateContent?key=${apiKey}`;
         const headers = { "Content-Type": "application/json" };
-        const body = { contents: [{role: "user", parts: [{ text: prompts }]}], tools: [{ google_search: {} }], tool_config: {
-                     google_search: { dynamic_retrieval_config: { mode: "MODE_DYNAMIC", dynamic_threshold: 0.1 }}} };
+        const body = { contents: [{role: "user", parts: [{ text: prompts }]}], tools: [{ google_search: {} }] };
         let response = await fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(body) });
         if (!response.ok) {
             const errorData = await response.json();
