@@ -34,29 +34,22 @@ export async function POST(req: NextRequest) {
   }
 
   try {
-    const { model, messages, stream } = await req.json();
+    const { model, systemRole, messages, temperature, stream } = await req.json();
     let apiUrl = "";
     let headers: Record<string, string> = {};
     let body: any = {};
 
-    if (model.startsWith("gpt-")) {
-      const apiKey = getNextKey("OPENAI_API_KEYS") || process.env.OPENAI_API_KEY!;
-      const base = process.env.OPENAI_PROXY_URL || "https://api.openai.com/v1";
-      apiUrl = `${base}/chat/completions`;
-      headers = { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` };
-      body = { model, messages, stream };
-    }
-
-    else if (model.startsWith("gemini")) {
-      const apiKey = getNextKey("GEMINI_API_KEYS") || process.env.GEMINI_API_KEY!;
-      const geminiModel = "models/" + model;
-      const base = process.env.GEMONI_PROXY_URL || "https://generativelanguage.googleapis.com/v1beta";
-      apiUrl = stream
-        ? `${base}/${geminiModel}:streamGenerateContent?alt=sse&key=${apiKey}`
-        : `${base}/${geminiModel}:generateContent?key=${apiKey}`;
-      headers = { "Content-Type": "application/json" };
-      body = { contents: [{ parts: messages.map((m: any) => ({ text: m.content })) }] };
-    }
+    const apiKey = getNextKey("GEMINI_API_KEYS") || process.env.GEMINI_API_KEY!;
+    const geminiModel = "models/" + model;
+    const base = process.env.GEMONI_PROXY_URL || "https://generativelanguage.googleapis.com/v1beta";
+    apiUrl = stream
+      ? `${base}/${geminiModel}:streamGenerateContent?alt=sse&key=${apiKey}`
+      : `${base}/${geminiModel}:generateContent?key=${apiKey}`;
+    headers = { "Content-Type": "application/json" };
+    body = {system_instruction: { parts: [{text: systemRole}]}, 
+            contents: [{ parts: messages.map((m: any) => ({ text: m.content })) }],
+            generationConfig: { temperature: temperature }
+          };
 
     const response = await fetch(apiUrl, { method: "POST", headers, body: JSON.stringify(body) });
     if (stream && response.body)
