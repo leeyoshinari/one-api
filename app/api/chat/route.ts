@@ -18,16 +18,6 @@ function checkAuth(req: NextRequest) {
   return false;
 }
 
-// 轮询 API Key 工具
-function getNextKey(envVar: string) {
-  const keys = (process.env[envVar] || "").split(",").map(k => k.trim()).filter(Boolean);
-  if (keys.length === 0) return null;
-  const counterKey = `__COUNTER_${envVar}`;
-  (global as any)[counterKey] = ((global as any)[counterKey] || 0) + 1;
-  const idx = (global as any)[counterKey] % keys.length;
-  return keys[idx];
-}
-
 export async function POST(req: NextRequest) {
   if (!checkAuth(req)) {
     return NextResponse.json({ error: "Forbidden: Invalid API key" }, { status: 403 });
@@ -39,9 +29,9 @@ export async function POST(req: NextRequest) {
     let headers: Record<string, string> = {};
     let body: any = {};
 
-    const apiKey = getNextKey("GEMINI_API_KEYS") || process.env.GEMINI_API_KEY!;
-    const geminiModel = "models/" + model;
-    const base = process.env.GEMONI_PROXY_URL || "https://generativelanguage.googleapis.com/v1beta";
+    const apiKey = process.env.GEMINI_API_KEY!;
+    const geminiModel = model.startsWith("models/") ? model : `models/${model}`;
+    const base = process.env.GEMINI_PROXY_URL || "https://generativelanguage.googleapis.com/v1beta";
     apiUrl = stream
       ? `${base}/${geminiModel}:streamGenerateContent?alt=sse&key=${apiKey}`
       : `${base}/${geminiModel}:generateContent?key=${apiKey}`;
