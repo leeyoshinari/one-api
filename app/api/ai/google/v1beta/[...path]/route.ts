@@ -59,7 +59,6 @@ export async function POST (req: NextRequest,
         if (!headers.has('content-type')) {
             headers.set('content-type', 'application/json');
         }
-        console.log(targetUrl.toString());
 
         const response = await fetch(targetUrl.toString(), {
             method: req.method,
@@ -91,7 +90,6 @@ export async function POST (req: NextRequest,
             headers: responseHeaders,
         });
     } catch (err: any) {
-        console.error(err);
         return NextResponse.json({ error: err.message || "Internal Proxy Error" }, { status: 500 });
     }
 }
