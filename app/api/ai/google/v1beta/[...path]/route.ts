@@ -73,6 +73,9 @@ export async function POST (req: NextRequest,
         const responseHeaders = new Headers(response.headers);
         responseHeaders.delete('transfer-encoding');
         responseHeaders.delete('connection');
+        responseHeaders.delete("content-encoding");
+        responseHeaders.delete("content-length");
+        responseHeaders.delete("keep-alive");
     
         // 如果是流式响应 (SSE)，确保客户端能正确识别
         if (targetUrl.searchParams.get('alt') === 'sse') {

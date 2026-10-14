@@ -85,6 +85,9 @@ async function handleProxy(
     const responseHeaders = new Headers(response.headers);
     responseHeaders.delete('transfer-encoding');
     responseHeaders.delete('connection');
+    responseHeaders.delete("content-encoding");
+    responseHeaders.delete("content-length");
+    responseHeaders.delete("keep-alive");
 
     // 原样返回 OpenAI 的响应 (状态码、Headers、Body 全部透传)
     return new Response(response.body, {
